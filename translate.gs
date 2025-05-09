@@ -1,4 +1,4 @@
-// Translates a Google Sheets 
+// Translates a Google Sheet
 /** @OnlyCurrentDoc */
 
 function ceviri() {
