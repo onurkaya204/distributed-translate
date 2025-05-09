@@ -1,15 +1,24 @@
 // Translates a Google Sheet
 /** @OnlyCurrentDoc */
 
+function columnNumberToLetter(column) {
+  var letter = "";
+  while (column > 0) {
+    var temp = (column - 1) % 26;
+    letter = String.fromCharCode(temp + 65) + letter;
+    column = Math.floor((column - 1) / 26);
+  }
+  return letter;
+}
+
 function ceviri() {
   var spreadsheet     = SpreadsheetApp.getActive();
   var activeSheet     = spreadsheet.getActiveSheet();
   var actualSheetName = activeSheet.getName();
-
   var ui = SpreadsheetApp.getUi();
 
   // Sayfa adı alınır (A1 hücresi)
-  var sheetName = activeSheet.getRange('B2').getValue();
+  var sheetName = activeSheet.getRange('A1').getValue();
   if (!sheetName) {
     ui.alert("Hata: A1 hücresinde geçerli bir sayfa adı bulunamadı. Lütfen bir ad girin.");
     return;
@@ -54,18 +63,20 @@ function ceviri() {
     return;
   }
 
-  // Formül
-  var formula = '=IF(ISBLANK(INDIRECT("'+ actualSheetName + '!"&VLOOKUP(COLUMN();Sayfa6!A:B;2;FALSE)&ROW()));"";IF(ISTEXT(INDIRECT("'+ actualSheetName +'!"&VLOOKUP(COLUMN();Sayfa6!A:B;2;FALSE)&ROW()));GOOGLETRANSLATE(INDIRECT("' + actualSheetName +'!"&VLOOKUP(COLUMN();Sayfa6!A:B;2;FALSE)&ROW());"' + source + '";"' + target + '");INDIRECT("'+ actualSheetName +'!"&VLOOKUP(COLUMN();Sayfa6!A:B;2;FALSE)&ROW())))'
-
   // Aralık tanımları
   var startCol = 1;   // A sütunu
-  var endCol   = 13;  // M sütunu
+  var endCol   = 3;  // C sütunu
   var startRow = 2;
   var endRow   = lastRow;
   // Formülleri hücrelere uygula
   for (var row = startRow; row <= endRow; row++) {
     for (var col = startCol; col <= endCol; col++) {
-      newSheet.getRange(row, col).setFormula(formula);
+  
+    var harf = columnNumberToLetter(col);
+
+         // Formül
+  var formula = '=IF(ISBLANK(INDIRECT("'+ actualSheetName + '!'+ harf +'"&ROW()));"";IF(ISTEXT(INDIRECT("'+ actualSheetName +'!'+ harf +'"&ROW()));GOOGLETRANSLATE(INDIRECT("' + actualSheetName +'!'+ harf +'"&ROW());"' + source + '";"' + target + '");INDIRECT("'+ actualSheetName +'!'+ harf +'"&ROW())))'
+        newSheet.getRange(row, col).setFormula(formula);
     }
   }
 
